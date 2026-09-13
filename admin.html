@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Panel - Anime Hindi Zone</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<script>
+  if (sessionStorage.getItem("toonflix_admin") !== "true" &&
+      localStorage.getItem("toonflix_admin") !== "true") {
+    window.location.replace("login.html");
+  }
+</script>
+</head>
+<body>
+
+<header class="top-header">
+  <a href="index.html" class="logo">
+    <span class="logo-icon">🔥</span>
+    <span class="logo-text">Anime<span>Hindi</span>Zone</span>
+    <span class="logo-badge">ADMIN</span>
+  </a>
+  <div class="header-actions">
+    <a href="analytics.html" class="admin-btn" style="background: linear-gradient(135deg, #22d3ee, #3b82f6);">📊 Analytics</a>
+    <a href="index.html" class="admin-btn">← Site</a>
+    <button onclick="logout()" class="logout-btn">🚪 Logout</button>
+  </div>
+</header>
+
+<div class="admin-container">
+
+  <section class="admin-section">
+    <h2>🔍 Search Anime (AniList — Auto Fetch)</h2>
+    <div class="search-panel-box">
+      <input id="malSearchInput" placeholder="Anime ka naam..." autocomplete="off" onkeyup="if(event.key==='Enter')searchMAL()">
+      <button class="primary-btn search-btn-inline" onclick="searchMAL()">🔍 Search</button>
+    </div>
+    <p class="search-hint-text">💡 AniList se automatic poster, year, rating sab aa jayega</p>
+    <div id="malLoading" style="display:none;text-align:center;padding:20px;">
+      <p class="empty-msg">🔄 Searching...</p>
+    </div>
+    <div id="malResults" class="anilist-results"></div>
+  </section>
+
+  <section class="admin-section">
+    <h2>✏️ Manual Add / Edit Anime</h2>
+    <div class="form-grid">
+      <input id="aTitle" placeholder="Anime Title *">
+      <input id="aPoster" placeholder="Poster Image URL *">
+      <input id="aBanner" placeholder="Banner Image URL (optional)">
+      <input id="aYear" placeholder="Year">
+      <input id="aRating" placeholder="Rating">
+      <input id="aGenres" placeholder="Genres (Action,Adventure)">
+      <input id="aEpisodes" placeholder="Total Episodes">
+      <textarea id="aDesc" placeholder="Description"></textarea>
+      <label class="checkbox-label"><input type="checkbox" id="aTop10"> Add to Top 10</label>
+      <button class="primary-btn" onclick="saveAnime()">💾 Save Anime</button>
+    </div>
+  </section>
+
+  <section class="admin-section">
+    <h2>🔍 Search Existing Anime</h2>
+    <input id="adminSearch" placeholder="Type anime name..." style="width:100%;padding:13px 15px;border-radius:12px;border:1px solid rgba(255,255,255,0.08);background:#0f0f1a;color:#fff;font-family:inherit;font-size:0.9rem;outline:none;">
+    <div class="cards-grid" id="adminSearchResults" style="margin-top:15px;"></div>
+  </section>
+
+  <section class="admin-section">
+    <h2>📚 All Anime</h2>
+    <div class="admin-list" id="adminList"></div>
+  </section>
+
+  <section class="admin-section" id="episodeSection" style="display:none;">
+    <h2>🎬 Add Episodes to: <span id="currentAnimeName" style="color:#d8b4fe;"></span></h2>
+    <div class="admin-mode-tabs">
+      <button class="admin-mode-tab active" data-mode="multiquality" onclick="switchAdminMode('multiquality', this)">🎯 Multi-Quality</button>
+      <button class="admin-mode-tab" data-mode="single" onclick="switchAdminMode('single', this)">📺 Single Link</button>
+      <button class="admin-mode-tab" data-mode="batch" onclick="switchAdminMode('batch', this)">⚡ Batch Add</button>
+    </div>
+
+    <div class="admin-mode-content active" id="mode-multiquality">
+      <div class="mode-hint"><strong>🎯 Smart Mode:</strong> Ek hi baar me saari qualities add karo.</div>
+      <div class="form-grid">
+        <input id="mqNumber" placeholder="Episode Number *" type="number">
+        <input id="mqTitle" placeholder="Episode Title">
+        <div class="quality-input-wrap"><label class="quality-label">📺 480p Link</label><input id="mq480" placeholder="https://..."></div>
+        <div class="quality-input-wrap"><label class="quality-label">🎬 720p Link</label><input id="mq720" placeholder="https://..."></div>
+        <div class="quality-input-wrap"><label class="quality-label">💎 1080p Link</label><input id="mq1080" placeholder="https://..."></div>
+        <div class="quality-input-wrap"><label class="quality-label">🎥 4K Link</label><input id="mq4k" placeholder="https://..."></div>
+        <div class="quality-input-wrap"><label class="quality-label">📱 Telegram Link</label><input id="mqTelegram" placeholder="https://t.me/..."></div>
+        <div class="quality-input-wrap"><label class="quality-label">⬇️ Download Link</label><input id="mqDownload" placeholder="https://..."></div>
+        <div class="quality-input-wrap"><label class="quality-label">🖼️ Thumbnail</label><input id="mqThumb" placeholder="https://..."></div>
+        <button class="primary-btn" onclick="addMultiQualityEpisode()">⚡ Add Episode (All Qualities)</button>
+      </div>
+    </div>
+
+    <div class="admin-mode-content" id="mode-single">
+      <div class="mode-hint"><strong>📺 Single Mode:</strong> Sirf ek link ho toh.</div>
+      <div class="form-grid">
+        <input id="slNumber" placeholder="Episode Number *" type="number">
+        <input id="slTitle" placeholder="Episode Title">
+        <input id="slLink" placeholder="🎬 Single Link">
+        <input id="slThumb" placeholder="Thumbnail">
+        <button class="primary-btn" onclick="addSingleEpisode()">➕ Add Episode</button>
+      </div>
+    </div>
+
+    <div class="admin-mode-content" id="mode-batch">
+      <div class="mode-hint"><strong>⚡ Batch Mode:</strong> Format: <code>number|480p|720p|1080p|telegram</code></div>
+      <div class="form-grid">
+        <textarea id="batchInput" placeholder="1|url1|url2|url3|t.me/xxx" style="min-height:180px;font-family:monospace;font-size:0.8rem;"></textarea>
+        <button class="primary-btn" onclick="addBatchEpisodes()">⚡ Add All</button>
+      </div>
+    </div>
+
+    <div id="episodeList" style="margin-top:20px;"></div>
+  </section>
+
+</div>
+
+<footer class="premium-footer">
+  <div class="footer-logo">🔥 Anime<span>Hindi</span>Zone Admin</div>
+  <p class="footer-copy">© 2025 Anime Hindi Zone — Admin Panel</p>
+</footer>
+
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+<script src="admin.js"></script>
+<script>
+function logout() {
+  if (!confirm("Logout?")) return;
+  sessionStorage.removeItem("toonflix_admin");
+  localStorage.removeItem("toonflix_admin");
+  window.location.href = "login.html";
+}
+function switchAdminMode(mode, btn) {
+  document.querySelectorAll(".admin-mode-tab").forEach(t => t.classList.remove("active"));
+  document.querySelectorAll(".admin-mode-content").forEach(c => c.classList.remove("active"));
+  btn.classList.add("active");
+  document.getElementById("mode-" + mode).classList.add("active");
+}
+</script>
+</body>
+  </html>
