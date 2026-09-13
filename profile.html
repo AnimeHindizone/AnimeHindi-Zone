@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Profile - Anime Hindi Zone</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="top-header">
+  <a href="index.html" class="logo">
+    <span class="logo-icon">🔥</span>
+    <span class="logo-text">Anime<span>Hindi</span>Zone</span>
+  </a>
+  <div class="header-actions">
+    <a href="index.html" class="admin-btn">← Home</a>
+  </div>
+</header>
+
+<div class="profile-container">
+  <div class="profile-card" id="profileCard"></div>
+
+  <div class="profile-tabs">
+    <button class="profile-tab active" data-tab="favorites">❤️ Favorites</button>
+    <button class="profile-tab" data-tab="rated">⭐ Rated</button>
+    <button class="profile-tab" data-tab="history">🕐 History</button>
+  </div>
+
+  <div class="profile-tab-content active" id="tab-favorites">
+    <div class="cards-grid" id="favoritesGrid"></div>
+  </div>
+  <div class="profile-tab-content" id="tab-rated">
+    <div class="cards-grid" id="ratedGrid"></div>
+  </div>
+  <div class="profile-tab-content" id="tab-history">
+    <div class="cards-grid" id="historyGrid"></div>
+  </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+<script>
+firebase.initializeApp({ databaseURL: "https://animehindi-zone-default-rtdb.firebaseio.com/" });
+</script>
+<script src="user.js"></script>
+<script src="i18n.js"></script>
+<script src="profile.js"></script>
+</body>
+</html>
