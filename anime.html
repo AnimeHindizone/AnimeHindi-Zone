@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Anime Details - Anime Hindi Zone</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="top-header">
+  <a href="index.html" class="logo">
+    <span class="logo-icon">🔥</span>
+    <span class="logo-text">Anime<span>Hindi</span>Zone</span>
+    <span class="logo-badge">HINDI</span>
+  </a>
+  <div class="header-extras">
+    <button class="header-icon-btn" onclick="toggleTheme()" id="themeBtn">🌙</button>
+    <button class="header-icon-btn" onclick="toggleLang()">🌐</button>
+    <a href="profile.html" class="header-icon-btn">👤</a>
+    <a href="login.html" class="admin-btn">Admin</a>
+  </div>
+</header>
+
+<div class="detail-container" id="detailContainer">
+  <p class="empty-msg" style="text-align:center;padding:60px 20px;">⏳ Loading...</p>
+</div>
+
+<footer class="premium-footer">
+  <div class="footer-logo">🔥 Anime<span>Hindi</span>Zone</div>
+  <p class="footer-copy">© 2025 Anime Hindi Zone — All Rights Reserved</p>
+</footer>
+
+<script>
+function toggleTheme() {
+  if (typeof ToonTheme === "undefined") return;
+  const t = ToonTheme.toggle();
+  document.getElementById("themeBtn").textContent = t === "dark" ? "🌙" : "☀️";
+}
+function toggleLang() { if (typeof ToonLang !== "undefined") ToonLang.toggle(); }
+document.addEventListener("DOMContentLoaded", function() {
+  if (typeof ToonTheme !== "undefined") {
+    const btn = document.getElementById("themeBtn");
+    if (btn) btn.textContent = ToonTheme.get() === "dark" ? "🌙" : "☀️";
+  }
+});
+</script>
+
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+<script src="user.js"></script>
+<script src="i18n.js"></script>
+<script src="analytics.js"></script>
+<script src="script.js"></script>
+</body>
+</html>
