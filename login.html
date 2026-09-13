@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Login - Anime Hindi Zone</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body class="login-body">
+
+<div class="login-container">
+  <div class="login-card">
+    <div class="login-logo">🔥 Anime<span>Hindi</span>Zone</div>
+    <h2>Admin Login</h2>
+    <p class="login-sub">Sirf admin hi is panel me aa sakta hai</p>
+
+    <form id="loginForm" onsubmit="handleLogin(event)">
+      <div class="input-group">
+        <label>🔒 Password</label>
+        <input type="password" id="passwordInput" placeholder="Password daalein..." required>
+      </div>
+      <button type="submit" class="primary-btn login-btn">🚀 Login</button>
+    </form>
+
+    <p class="login-error" id="loginError"></p>
+    <a href="index.html" class="back-link">← Wapas Home</a>
+  </div>
+</div>
+
+<script src="login.js"></script>
+</body>
+</html>
