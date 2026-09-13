@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Watch - Anime Hindi Zone</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="top-header">
+  <a href="index.html" class="logo">
+    <span class="logo-icon">🔥</span>
+    <span class="logo-text">Anime<span>Hindi</span>Zone</span>
+  </a>
+  <div class="header-actions">
+    <button class="icon-btn" onclick="goBack()">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M19 12H5M12 19l-7-7 7-7"/>
+      </svg>
+    </button>
+    <a href="login.html" class="admin-btn">Admin</a>
+  </div>
+</header>
+
+<div class="watch-container" id="watchContainer"></div>
+
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+<script src="user.js"></script>
+<script src="i18n.js"></script>
+<script src="analytics.js"></script>
+<script src="watch.js"></script>
+</body>
+</html>
