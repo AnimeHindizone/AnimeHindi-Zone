@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Analytics - Anime Hindi Zone</title>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="analytics-style.css">
+<script>
+  if (sessionStorage.getItem("toonflix_admin") !== "true" &&
+      localStorage.getItem("toonflix_admin") !== "true") {
+    window.location.replace("login.html");
+  }
+</script>
+</head>
+<body>
+
+<header class="top-header">
+  <a href="index.html" class="logo">
+    <span class="logo-icon">🔥</span>
+    <span class="logo-text">Anime<span>Hindi</span>Zone</span>
+    <span class="logo-badge">ANALYTICS</span>
+  </a>
+  <div class="header-actions">
+    <a href="admin.html" class="admin-btn">← Admin</a>
+    <a href="index.html" class="admin-btn">Site</a>
+    <button onclick="logoutAnalytics()" class="logout-btn">🚪 Logout</button>
+  </div>
+</header>
+
+<div class="analytics-container">
+  <div class="kpi-grid">
+    <div class="kpi-card pink"><div class="kpi-icon">👥</div><div class="kpi-info"><p>Aaj ke Users</p><h3 id="todayUsers">-</h3></div></div>
+    <div class="kpi-card purple"><div class="kpi-icon">📄</div><div class="kpi-info"><p>Aaj ke Views</p><h3 id="todayViews">-</h3></div></div>
+    <div class="kpi-card cyan"><div class="kpi-icon">🌐</div><div class="kpi-info"><p>Total Views</p><h3 id="totalViews">-</h3></div></div>
+    <div class="kpi-card gold"><div class="kpi-icon">⭐</div><div class="kpi-info"><p>Total Users</p><h3 id="totalUsers">-</h3></div></div>
+  </div>
+
+  <section class="analytics-section">
+    <h2>📅 Last 7 Days Trend</h2>
+    <div class="chart-wrap"><div class="chart-bars" id="chartBars"></div></div>
+  </section>
+
+  <section class="analytics-section">
+    <h2>🏆 Top 10 Watched Anime</h2>
+    <div class="top-list" id="topAnimeList"></div>
+  </section>
+
+  <section class="analytics-section">
+    <h2>📱 Devices</h2>
+    <div class="device-grid" id="deviceGrid"></div>
+  </section>
+
+  <section class="analytics-section">
+    <h2>📊 Page Views Breakdown</h2>
+    <div class="page-list" id="pageList"></div>
+  </section>
+
+  <section class="analytics-section">
+    <h2>🕐 Recent Visitors</h2>
+    <div class="recent-list" id="recentList"></div>
+  </section>
+
+  <section class="analytics-section">
+    <h2>📋 All Days History</h2>
+    <div class="all-days-list" id="allDaysList"></div>
+  </section>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+<script src="analytics-dashboard.js"></script>
+<script>
+function logoutAnalytics() {
+  if (!confirm("Logout?")) return;
+  sessionStorage.removeItem("toonflix_admin");
+  localStorage.removeItem("toonflix_admin");
+  window.location.href = "login.html";
+}
+</script>
+</body>
+                                                                                 </html>
