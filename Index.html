@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Anime Hindi Zone - Premium Anime Streaming</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="top-header">
+  <a href="index.html" class="logo">
+    <span class="logo-icon">🔥</span>
+    <span class="logo-text">Anime<span>Hindi</span>Zone</span>
+    <span class="logo-badge">HINDI</span>
+  </a>
+  <div class="header-extras">
+    <button class="header-icon-btn" onclick="toggleTheme()" id="themeBtn" title="Theme">🌙</button>
+    <button class="header-icon-btn" onclick="toggleLang()" title="Language">🌐</button>
+    <a href="profile.html" class="header-icon-btn" title="Profile">👤</a>
+    <a href="login.html" class="admin-btn">Admin</a>
+  </div>
+</header>
+
+<div class="search-wrap" id="searchWrap">
+  <svg class="search-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+    <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+  </svg>
+  <input type="text" id="searchInput" placeholder="Anime, movie, genre search karein...">
+  <button id="searchBtn">GO</button>
+</div>
+
+<div style="text-align:center;">
+  <button class="filter-panel-btn" onclick="toggleFilterPanel()">🔍 Advanced Filter</button>
+</div>
+
+<div class="filter-panel" id="filterPanel">
+  <div class="filter-row">
+    <div><label>📅 Year</label><select id="filterYear"><option value="All">All Years</option></select></div>
+    <div><label>⭐ Min Rating</label><select id="filterRating">
+      <option value="All">Any</option><option value="6">6+</option><option value="7">7+</option>
+      <option value="8">8+</option><option value="9">9+</option>
+    </select></div>
+    <div><label>🎬 Format</label><select id="filterFormat">
+      <option value="All">All</option><option value="TV">TV Series</option>
+      <option value="MOVIE">Movie</option><option value="OVA">OVA</option>
+    </select></div>
+  </div>
+  <div class="filter-actions">
+    <button class="apply" onclick="applyAdvancedFilter()">✅ Apply Filter</button>
+    <button class="reset" onclick="resetAdvancedFilter()">🔄 Reset</button>
+  </div>
+</div>
+
+<section class="hero-section" id="heroSection">
+  <div class="hero-slider" id="heroSlider"></div>
+</section>
+
+<section class="chips-section">
+  <div class="chips-scroll" id="genreBtns"></div>
+</section>
+
+<section class="row-section" id="continueWatchingSection" style="display:none;">
+  <div class="row-header">
+    <div class="row-title-wrap">
+      <span class="row-dot" style="background:#22d3ee;"></span>
+      <h2 data-i18n="continue_watching">Continue Watching</h2>
+    </div>
+    <button onclick="clearHistory()" class="see-all" data-i18n="clear">Clear</button>
+  </div>
+  <div class="row-scroll" id="continueWatching"></div>
+</section>
+
+<section class="row-section">
+  <div class="row-header">
+    <div class="row-title-wrap">
+      <span class="row-dot" style="background:#8b5cf6;"></span>
+      <h2 data-i18n="newly_updated">Newly Updated</h2>
+    </div>
+    <a href="#all" class="see-all" data-i18n="see_all">See All →</a>
+  </div>
+  <div class="row-scroll" id="newlyUpdated"></div>
+</section>
+
+<section class="row-section">
+  <div class="row-header">
+    <div class="row-title-wrap">
+      <span class="row-dot" style="background:#10b981;"></span>
+      <h2 data-i18n="top_10">Top 10 This Week</h2>
+    </div>
+  </div>
+  <div class="row-scroll" id="top10Grid"></div>
+</section>
+
+<section class="row-section" id="all">
+  <div class="row-header">
+    <div class="row-title-wrap">
+      <span class="row-dot" style="background:#8b5cf6;"></span>
+      <h2 data-i18n="all_anime">All Anime</h2>
+    </div>
+  </div>
+  <div class="cards-grid" id="allAnime"></div>
+</section>
+
+<footer class="premium-footer">
+  <div class="footer-logo">🔥 Anime<span>Hindi</span>Zone</div>
+  <p>Premium Anime Streaming • Made with ❤️ in India</p>
+  <div class="footer-links">
+    <a href="index.html">Home</a>
+    <a href="#all">All Anime</a>
+    <a href="profile.html">Profile</a>
+    <a href="login.html">Admin</a>
+  </div>
+  <p class="footer-copy">© 2025 Anime Hindi Zone — All Rights Reserved</p>
+</footer>
+
+<nav class="bottom-nav">
+  <a href="index.html" class="active">
+    <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/>
+    </svg>
+    <small>Home</small>
+  </a>
+  <a href="javascript:focusSearch()">
+    <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2">
+      <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+    </svg>
+    <small>Search</small>
+  </a>
+  <a href="javascript:scrollToGenres()">
+    <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2">
+      <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
+      <rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
+    </svg>
+    <small>Genres</small>
+  </a>
+  <a href="profile.html">
+    <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+    </svg>
+    <small>Profile</small>
+  </a>
+</nav>
+
+<script>
+function focusSearch() {
+  document.getElementById("searchInput").focus();
+  document.getElementById("searchWrap").scrollIntoView({behavior:"smooth", block:"center"});
+}
+function scrollToGenres() {
+  document.getElementById("genreBtns").scrollIntoView({behavior:"smooth", block:"center"});
+}
+function clearHistory() {
+  if (!confirm("History clear karein?")) return;
+  localStorage.removeItem("toonflix_history");
+  location.reload();
+}
+function toggleTheme() {
+  if (typeof ToonTheme === "undefined") return;
+  const t = ToonTheme.toggle();
+  document.getElementById("themeBtn").textContent = t === "dark" ? "🌙" : "☀️";
+  if (typeof showToast === "function") showToast(t === "dark" ? "🌙 Dark" : "☀️ Light");
+}
+function toggleLang() {
+  if (typeof ToonLang === "undefined") return;
+  ToonLang.toggle();
+}
+document.addEventListener("DOMContentLoaded", function() {
+  if (typeof ToonTheme !== "undefined") {
+    const t = ToonTheme.get();
+    const btn = document.getElementById("themeBtn");
+    if (btn) btn.textContent = t === "dark" ? "🌙" : "☀️";
+  }
+});
+</script>
+
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+<script src="user.js"></script>
+<script src="i18n.js"></script>
+<script src="analytics.js"></script>
+<script src="script.js"></script>
+</body>
+</html>
