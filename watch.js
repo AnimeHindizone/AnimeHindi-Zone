@@ -57,4 +57,93 @@ function loadWatchPage() {
   });
 }
 
-function renderPlayer(anime
+function renderPlayer(anime, ep, servers, prevEp, nextEp) {
+  const el = document.getElementById("watchContainer");
+  const embedUrl = servers[0]?.link || "";
+  const comments = JSON.parse(localStorage.getItem(`comments_${anime.id}_${ep.number}`) || "[]");
+  const safeAnimeId = encodeURIComponent(anime.id);
+
+  el.innerHTML = `
+    <div class="watch-header"><h1>${anime.title || "Untitled"}</h1><p class="watch-ep-title">Episode ${ep.number}${ep.title ? ": " + ep.title : ""}</p></div>
+    <div class="video-wrapper">${embedUrl ? `<iframe src="${embedUrl}" allowfullscreen frameborder="0" allow="autoplay; encrypted-media; picture-in-picture"></iframe>` : `<div class="video-placeholder">⚠️ Is episode ka video link nahi hai</div>`}</div>
+    ${servers.length > 1 ? `
+      <div class="server-selector">
+        <p class="server-label">🎬 Quality / Servers:</p>
+        <div class="server-btns">${servers.map((s, i) => `<button class="server-btn ${i === 0 ? 'active' : ''}" onclick="switchServer('${s.link}', this)">${s.icon || "🎬"} ${s.name}</button>`).join("")}</div>
+      </div>` : ""}
+    <div class="watch-actions">
+      ${ep.telegram ? `<a href="${ep.telegram}" target="_blank" rel="noopener" class="watch-action-btn telegram">📱 Telegram</a>` : ""}
+      ${ep.download ? `<a href="${ep.download}" target="_blank" rel="noopener" class="watch-action-btn download">⬇️ Download</a>` : ""}
+      <button class="watch-action-btn comment" onclick="toggleComments()">💬 Comments (${comments.length})</button>
+    </div>
+    <div class="comments-section" id="commentsSection" style="display:none;">
+      <h3>💬 Comments</h3>
+      <div class="comment-form">
+        <input id="commentName" placeholder="Aapka naam..." maxlength="30">
+        <textarea id="commentText" placeholder="Comment likhein..." maxlength="300"></textarea>
+        <button onclick="addComment()" class="comment-post-btn">Post Comment</button>
+      </div>
+      <div class="comments-list" id="commentsList">
+        ${comments.length ? comments.map(c => `<div class="comment-item"><div class="comment-header"><strong>${c.name}</strong><small>${timeAgo(c.time)}</small></div><p>${c.text}</p></div>`).join("") : '<p class="empty-msg">Abhi koi comment nahi.</p>'}
+      </div>
+    </div>
+    <div class="ep-nav">
+      ${prevEp ? `<a href="watch.html?anime=${safeAnimeId}&ep=${prevEp.number}" class="ep-nav-btn">⏮️ EP ${prevEp.number}</a>` : `<button class="ep-nav-btn disabled" disabled>⏮️ No Previous</button>`}
+      ${nextEp ? `<a href="watch.html?anime=${safeAnimeId}&ep=${nextEp.number}" class="ep-nav-btn next">EP ${nextEp.number} ⏭️</a>` : `<button class="ep-nav-btn disabled" disabled>No Next ⏭️</button>`}
+    </div>
+    <div class="all-episodes-list">
+      <h3>📺 Saare Episodes (${allEpisodes.length})</h3>
+      <div class="ep-list-grid">
+        ${allEpisodes.map(e => `<a href="watch.html?anime=${safeAnimeId}&ep=${e.number}" class="ep-list-btn ${e.number === ep.number ? 'active' : ''}"><span class="ep-num">${e.number}</span><span class="ep-name">${e.title || "Episode " + e.number}</span>${e.telegram ? '<span class="ep-tg">📱</span>' : ''}</a>`).join("")}
+      </div>
+    </div>
+    <div class="back-to-anime"><a href="anime.html?id=${safeAnimeId}" class="primary-btn" style="display:block;text-align:center;text-decoration:none;">← ${anime.title} - Full Details</a></div>
+  `;
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function switchServer(link, btn) {
+  document.querySelectorAll(".server-btn").forEach(b => b.classList.remove("active"));
+  btn.classList.add("active");
+  const iframe = document.querySelector(".video-wrapper iframe");
+  if (iframe) iframe.src = link;
+}
+
+function toggleComments() {
+  const s = document.getElementById("commentsSection");
+  s.style.display = s.style.display === "none" ? "block" : "none";
+  if (s.style.display === "block") s.scrollIntoView({ behavior: "smooth" });
+}
+
+function addComment() {
+  const name = document.getElementById("commentName").value.trim() || "Anonymous";
+  const text = document.getElementById("commentText").value.trim();
+  if (!text) { alert("Comment likho!"); return; }
+  const key = `comments_${currentAnime.id}_${currentEpNum}`;
+  const comments = JSON.parse(localStorage.getItem(key) || "[]");
+  comments.unshift({ name, text, time: Date.now() });
+  localStorage.setItem(key, JSON.stringify(comments.slice(0, 50)));
+  document.getElementById("commentText").value = "";
+  loadWatchPage();
+}
+
+function saveProgress(anime, ep) {
+  try {
+    const history = JSON.parse(localStorage.getItem("toonflix_history") || "[]");
+    const filtered = history.filter(h => h.animeId !== anime.id);
+    filtered.unshift({ animeId: anime.id, title: anime.title, poster: anime.poster, epNumber: ep.number, epTitle: ep.title || "", timestamp: Date.now() });
+    localStorage.setItem("toonflix_history", JSON.stringify(filtered.slice(0, 20)));
+  } catch (e) {}
+}
+
+function timeAgo(ts) {
+  const diff = Date.now() - ts;
+  const min = Math.floor(diff / 60000);
+  if (min < 1) return "just now";
+  if (min < 60) return `${min}m ago`;
+  const hr = Math.floor(min / 60);
+  if (hr < 24) return `${hr}h ago`;
+  return `${Math.floor(hr / 24)}d ago`;
+}
+
+loadWatchPage();
