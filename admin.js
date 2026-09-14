@@ -154,7 +154,7 @@ function renderAniListResults(list) {
 }
 
 // ═══════════════════════════════════════════
-// SAFE ADD FUNCTION (FIX)
+// SAFE ADD FUNCTION — Index Se Anime Nikaalta Hai
 // ═══════════════════════════════════════════
 function addFromAniListByIndex(idx, btn) {
   console.log("➕ Add clicked for index:", idx);
