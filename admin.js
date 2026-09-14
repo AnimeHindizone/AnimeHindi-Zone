@@ -1,5 +1,5 @@
 // ═══════════════════════════════════════════
-// ANIME HINDI ZONE - ADMIN PANEL (FIXED)
+// ANIME HINDI ZONE - ADMIN PANEL (SEASON SYSTEM)
 // ═══════════════════════════════════════════
 
 const firebaseConfig = {
@@ -11,6 +11,9 @@ const animeRef = db.ref("anime");
 
 let allAnime = [];
 let currentEditId = null;
+let currentSeason = "Season_1";
+
+console.log("🔥 Admin.js started");
 
 // ═══════════════════════════════════════════
 // ANILIST API
@@ -48,70 +51,43 @@ function stripHtml(html) {
     .trim();
 }
 
-// ═══════════════════════════════════════════
-// SEARCH FUNCTION
-// ═══════════════════════════════════════════
+// ═══ SEARCH FUNCTION ═══
 function searchMAL() {
   const input = document.getElementById("malSearchInput");
   const results = document.getElementById("malResults");
   const loading = document.getElementById("malLoading");
 
-  if (!input || !results) {
-    alert("Search box missing! admin.html update karo.");
-    return;
-  }
+  if (!input || !results) { alert("Search box missing!"); return; }
 
   const query = input.value.trim();
-  if (!query) {
-    results.innerHTML = '<p class="empty-msg">⚠️ Anime ka naam likhein</p>';
-    return;
-  }
+  if (!query) { results.innerHTML = '<p class="empty-msg">⚠️ Anime ka naam likhein</p>'; return; }
 
-  console.log("🔍 Searching AniList for:", query);
   results.innerHTML = "";
   if (loading) loading.style.display = "block";
 
   fetch(ANILIST_URL, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "Accept": "application/json"
-    },
-    body: JSON.stringify({
-      query: ANILIST_QUERY,
-      variables: { search: query }
-    })
+    headers: { "Content-Type": "application/json", "Accept": "application/json" },
+    body: JSON.stringify({ query: ANILIST_QUERY, variables: { search: query } })
   })
-  .then(res => {
-    if (!res.ok) throw new Error("HTTP " + res.status);
-    return res.json();
-  })
+  .then(res => res.json())
   .then(data => {
     if (loading) loading.style.display = "none";
-    const list = data?.data?.Page?.media || [];
-    console.log("✅ Found:", list.length, "results");
-    renderAniListResults(list);
+    renderAniListResults(data?.data?.Page?.media || []);
   })
   .catch(err => {
-    console.error("❌ AniList error:", err);
+    console.error(err);
     if (loading) loading.style.display = "none";
-    results.innerHTML = '<p class="empty-msg">❌ AniList se connect nahi ho paya. 1 minute baad try karo.</p>';
+    results.innerHTML = '<p class="empty-msg">❌ AniList se connect nahi ho paya.</p>';
   });
 }
 
-// ═══════════════════════════════════════════
-// RENDER RESULTS (FIXED — Multiple Add Buttons)
-// ═══════════════════════════════════════════
+// ═══ RENDER RESULTS (FIXED) ═══
 function renderAniListResults(list) {
   const el = document.getElementById("malResults");
   if (!el) return;
+  if (!list.length) { el.innerHTML = '<p class="empty-msg">❌ Koi match nahi mila.</p>'; return; }
 
-  if (!list.length) {
-    el.innerHTML = '<p class="empty-msg">❌ Koi match nahi mila. Spelling check karo.</p>';
-    return;
-  }
-
-  // ═══ IMPORTANT: Store results globally for safe access ═══
   window._anilistResults = list;
 
   el.innerHTML = `
@@ -125,11 +101,10 @@ function renderAniListResults(list) {
         const episodes = m.episodes || "";
         const format = m.format || "TV";
         const poster = m.coverImage?.large || "";
-
         return `
           <div class="anilist-card">
             <div class="anilist-poster">
-              <img src="${poster}" alt="${title}" onerror="this.src='https://via.placeholder.com/300x400'">
+              <img src="${poster}" onerror="this.src='https://via.placeholder.com/300x400'">
               ${rating ? `<span class="anilist-rating">⭐ ${rating}</span>` : ''}
             </div>
             <div class="anilist-info">
@@ -140,88 +115,46 @@ function renderAniListResults(list) {
                 ${format ? `<span>📺 ${format}</span>` : ''}
               </div>
               <p class="anilist-genre">${genre}</p>
-              <button 
-                class="primary-btn anilist-add-btn" 
-                data-index="${idx}"
-                onclick="addFromAniListByIndex(${idx}, this)"
-              >
-                ➕ Add to Library
-              </button>
+              <button class="primary-btn anilist-add-btn" onclick="addFromAniListByIndex(${idx}, this)">➕ Add to Library</button>
             </div>
           </div>`;
       }).join("")}
     </div>`;
 }
 
-// ═══════════════════════════════════════════
-// SAFE ADD FUNCTION — Index Se Anime Nikaalta Hai
-// ═══════════════════════════════════════════
 function addFromAniListByIndex(idx, btn) {
-  console.log("➕ Add clicked for index:", idx);
   const media = window._anilistResults && window._anilistResults[idx];
-
-  if (!media) {
-    console.error("❌ No data for index:", idx);
-    alert("Error: Anime data nahi mila. Dobara search karo.");
-    btn.disabled = false;
-    btn.textContent = "➕ Add to Library";
-    return;
-  }
-
+  if (!media) { alert("Data not found!"); return; }
   addFromAniList(media, btn);
 }
 
 function addFromAniList(media, btn) {
   btn.disabled = true;
   btn.textContent = "⏳ Adding...";
-
   const title = media.title?.english || media.title?.romaji || "Untitled";
   const year = media.startDate?.year ? String(media.startDate.year) : "";
   const rating = media.averageScore ? (media.averageScore / 10).toFixed(1) : "";
   const genres = (media.genres || []).join(", ");
   const episodes = media.episodes ? String(media.episodes) : "";
   const desc = stripHtml(media.description).slice(0, 800);
-  const poster = media.coverImage?.large || "";
-  const banner = media.bannerImage || "";
-  const format = media.format || "TV";
 
-  const payload = {
-    title,
-    poster,
-    banner,
-    year,
-    rating,
-    genres,
-    totalEpisodes: episodes,
-    description: desc,
-    format,
-    anilistId: media.id,
-    top10: false,
-    createdAt: Date.now(),
-    updatedAt: Date.now()
-  };
-
-  animeRef.push(payload).then(() => {
-    console.log("✅ Added:", title);
+  animeRef.push({
+    title, poster: media.coverImage?.large || "", banner: media.bannerImage || "",
+    year, rating, genres, totalEpisodes: episodes, description: desc,
+    format: media.format || "TV", anilistId: media.id, top10: false,
+    createdAt: Date.now(), updatedAt: Date.now()
+  }).then(() => {
     btn.textContent = "✅ Added!";
     btn.style.background = "linear-gradient(135deg, #10b981, #059669)";
     showToast(`✅ "${title}" added!`);
-  }).catch(err => {
-    console.error("❌ Add error:", err);
-    btn.disabled = false;
-    btn.textContent = "❌ Retry";
-    btn.style.background = "";
-    alert("Error: " + err.message);
-  });
+  }).catch(err => { btn.disabled = false; btn.textContent = "❌ Retry"; alert(err.message); });
 }
 
-// ═══════════════════════════════════════════
-// LOAD ALL ANIME (Real-time)
-// ═══════════════════════════════════════════
+// ═══ LOAD ALL ANIME ═══
 animeRef.on("value", (snap) => {
   const data = snap.val() || {};
   allAnime = Object.entries(data).map(([id, val]) => ({ id, ...val }));
-  console.log("📥 Loaded:", allAnime.length, "anime");
+  console.log("✅ Loaded:", allAnime.length, "anime");
   renderAdminList(allAnime);
 }, (error) => {
   console.error("❌ Firebase error:", error);
@@ -229,20 +162,19 @@ animeRef.on("value", (snap) => {
   if (el) el.innerHTML = '<p class="empty-msg">❌ Error: ' + error.message + '</p>';
 });
 
-// ═══════════════════════════════════════════
-// RENDER ADMIN LIST
-// ═══════════════════════════════════════════
+// ═══ RENDER ADMIN LIST ═══
 function renderAdminList(list) {
-  console.log("📚 Rendering:", list.length, "cards");
   const el = document.getElementById("adminList");
-  if (!el) { console.error("❌ adminList missing"); return; }
-  if (!list || !list.length) {
-    el.innerHTML = '<p class="empty-msg">No anime yet.</p>';
-    return;
-  }
+  if (!el) return;
+  if (!list || !list.length) { el.innerHTML = '<p class="empty-msg">No anime yet.</p>'; return; }
 
   el.innerHTML = list.map(a => {
-    const epCount = a.episodes ? Object.keys(a.episodes).length : 0;
+    let epCount = 0;
+    if (a.seasons) {
+      Object.values(a.seasons).forEach(seasonEps => { epCount += Object.keys(seasonEps).length; });
+    } else if (a.episodes) {
+      epCount = Object.keys(a.episodes).length;
+    }
     const title = (a.title || 'Untitled').replace(/'/g, "\\'");
     return `
       <div class="admin-list-item">
@@ -279,17 +211,13 @@ function deleteAnime(id, title) {
   animeRef.child(id).remove().then(() => alert("🗑️ Deleted"));
 }
 
-// ═══════════════════════════════════════════
-// SAVE ANIME (Manual)
-// ═══════════════════════════════════════════
 function saveAnime() {
   const title = document.getElementById("aTitle").value.trim();
   const poster = document.getElementById("aPoster").value.trim();
-  if (!title || !poster) { alert("Title aur Poster URL zaroori hai!"); return; }
+  if (!title || !poster) { alert("Title aur Poster zaroori hai!"); return; }
 
   const anime = {
-    title,
-    poster,
+    title, poster,
     banner: document.getElementById("aBanner").value.trim(),
     year: document.getElementById("aYear").value.trim(),
     rating: document.getElementById("aRating").value.trim(),
@@ -301,16 +229,10 @@ function saveAnime() {
   };
 
   if (currentEditId) {
-    animeRef.child(currentEditId).update(anime).then(() => {
-      alert("✅ Updated!");
-      resetAnimeForm();
-    });
+    animeRef.child(currentEditId).update(anime).then(() => { alert("✅ Updated!"); resetAnimeForm(); });
   } else {
     anime.createdAt = Date.now();
-    animeRef.push(anime).then(() => {
-      alert("✅ Anime added!");
-      resetAnimeForm();
-    });
+    animeRef.push(anime).then(() => { alert("✅ Added!"); resetAnimeForm(); });
   }
 }
 
@@ -324,9 +246,7 @@ function resetAnimeForm() {
   currentEditId = null;
 }
 
-// ═══════════════════════════════════════════
-// ADMIN SEARCH
-// ═══════════════════════════════════════════
+// ═══ ADMIN SEARCH ═══
 const adminSearchInput = document.getElementById("adminSearch");
 if (adminSearchInput) {
   adminSearchInput.addEventListener("input", (e) => {
@@ -344,34 +264,96 @@ if (adminSearchInput) {
 }
 
 // ═══════════════════════════════════════════
-// EPISODES
+// SEASON SYSTEM
 // ═══════════════════════════════════════════
 function openEpisodes(id, title) {
   currentEditId = id;
   document.getElementById("currentAnimeName").textContent = title;
   document.getElementById("episodeSection").style.display = "block";
   window.scrollTo({ top: document.getElementById("episodeSection").offsetTop, behavior: "smooth" });
-  loadEpisodes(id);
+  loadSeasons(id);
 }
 
-function loadEpisodes(id) {
-  animeRef.child(id).child("episodes").off();
-  animeRef.child(id).child("episodes").on("value", (snap) => {
+function loadSeasons(animeId) {
+  animeRef.child(animeId).once("value").then(snap => {
+    const anime = snap.val() || {};
+    const seasons = anime.seasons || {};
+    const seasonKeys = Object.keys(seasons).sort((x, y) => {
+      const nx = parseInt(x.replace(/\D/g, "")) || 0;
+      const ny = parseInt(y.replace(/\D/g, "")) || 0;
+      return nx - ny;
+    });
+
+    const seasonSelector = document.getElementById("seasonSelector");
+    if (seasonSelector) {
+      seasonSelector.innerHTML = `
+        <label style="font-size:0.75rem;color:#c4b5fd;font-weight:700;margin-bottom:8px;display:block;">📺 Season Select Karo:</label>
+        <div class="season-selector-tabs">
+          ${seasonKeys.map(sk => `
+            <button class="season-selector-tab ${sk === currentSeason ? 'active' : ''}" 
+                    onclick="selectSeason('${animeId}','${sk}')">
+              ${sk.replace(/_/g, " ")}
+            </button>
+          `).join("")}
+          <button class="season-selector-tab new-season-btn" onclick="createNewSeason('${animeId}')">
+            ➕ New Season
+          </button>
+        </div>
+      `;
+    }
+
+    if (seasonKeys.length === 0) {
+      currentSeason = "Season_1";
+      loadEpisodesForSeason(animeId, currentSeason);
+    } else {
+      if (!seasonKeys.includes(currentSeason)) currentSeason = seasonKeys[0];
+      loadEpisodesForSeason(animeId, currentSeason);
+    }
+  });
+}
+
+window.selectSeason = function(animeId, seasonName) {
+  currentSeason = seasonName;
+  loadSeasons(animeId);
+};
+
+window.createNewSeason = function(animeId) {
+  const name = prompt("Naye season ka naam likho:", "Season " + (Object.keys(window._currentSeasons || {}).length + 1));
+  if (!name) return;
+
+  const cleanName = name.trim().replace(/\s+/g, "_");
+
+  animeRef.child(animeId).child("seasons").child(cleanName).set({}).then(() => {
+    showToast("✅ Season created: " + name);
+    currentSeason = cleanName;
+    loadSeasons(animeId);
+  });
+};
+
+function loadEpisodesForSeason(animeId, seasonName) {
+  animeRef.child(animeId).child("seasons").child(seasonName).off();
+  animeRef.child(animeId).child("seasons").child(seasonName).on("value", snap => {
     const eps = snap.val() || {};
     const list = Object.entries(eps).sort((a,b) => a[1].number - b[1].number);
     const el = document.getElementById("episodeList");
-    if (!list.length) { el.innerHTML = '<p class="empty-msg">No episodes yet.</p>'; return; }
+    if (!el) return;
+
+    if (!list.length) {
+      el.innerHTML = `<p class="empty-msg">Is season (${seasonName.replace(/_/g," ")}) me abhi koi episode nahi hai.</p>`;
+      return;
+    }
 
     el.innerHTML = `
       <div style="margin-top:20px;">
-        <h3 style="color:#c4b5fd;font-size:1rem;margin-bottom:12px;">📺 Episodes (${list.length})</h3>
+        <h3 style="color:#c4b5fd;font-size:1rem;margin-bottom:12px;">
+          📺 ${seasonName.replace(/_/g," ")} — ${list.length} Episodes
+        </h3>
         ${list.map(([eid, ep]) => {
           const qualities = [];
           if (ep.q480) qualities.push('480p');
           if (ep.q720) qualities.push('720p');
           if (ep.q1080) qualities.push('1080p');
           if (ep.q4k) qualities.push('4K');
-          if (ep.streaming) qualities.push('S1');
           if (ep.telegram) qualities.push('📱');
           if (ep.download) qualities.push('⬇️');
           return `
@@ -380,16 +362,17 @@ function loadEpisodes(id) {
                 <strong>EP ${ep.number}: ${ep.title || ''}</strong>
                 <small>${qualities.join(' • ') || 'No links'}</small>
               </div>
-              <button class="btn-delete" onclick="deleteEpisode('${eid}')">Del</button>
+              <button class="btn-delete" onclick="deleteSeasonEpisode('${animeId}','${seasonName}','${eid}')">Del</button>
             </div>`;
         }).join("")}
       </div>`;
   });
 }
 
-// ═══ MULTI-QUALITY EPISODE ═══
+// ═══ ADD MULTI-QUALITY (SEASON-WISE) ═══
 function addMultiQualityEpisode() {
   if (!currentEditId) { alert("Pehle anime select karein."); return; }
+  if (!currentSeason) { alert("Pehle season select karo."); return; }
 
   const num = document.getElementById("mqNumber").value;
   const title = document.getElementById("mqTitle").value.trim();
@@ -402,29 +385,18 @@ function addMultiQualityEpisode() {
   const thumb = document.getElementById("mqThumb").value.trim();
 
   if (!num) { alert("Episode Number zaroori hai!"); return; }
-  if (!q480 && !q720 && !q1080 && !q4k && !telegram) {
-    alert("Kam se kam ek link daalo!");
-    return;
-  }
+  if (!q480 && !q720 && !q1080 && !q4k && !telegram) { alert("Kam se kam ek link daalo!"); return; }
 
   const payload = {
-    number: parseInt(num),
-    title: title,
-    q480: q480,
-    q720: q720,
-    q1080: q1080,
-    q4k: q4k,
+    number: parseInt(num), title, q480, q720, q1080, q4k,
     streaming: q480 || q720 || q1080 || q4k || "",
     streaming2: q720 && q480 ? q720 : "",
     streaming3: q1080 && q480 ? q1080 : "",
-    telegram: telegram,
-    download: download,
-    thumb: thumb,
-    createdAt: Date.now()
+    telegram, download, thumb, createdAt: Date.now()
   };
 
-  animeRef.child(currentEditId).child("episodes").push(payload).then(() => {
-    showToast("✅ Episode added!");
+  animeRef.child(currentEditId).child("seasons").child(currentSeason).push(payload).then(() => {
+    showToast("✅ Episode added to " + currentSeason.replace(/_/g, " ") + "!");
     ["mqNumber","mqTitle","mq480","mq720","mq1080","mq4k","mqTelegram","mqDownload","mqThumb"].forEach(id => {
       const el = document.getElementById(id);
       if (el) el.value = "";
@@ -432,9 +404,10 @@ function addMultiQualityEpisode() {
   }).catch(e => alert("❌ Error: " + e.message));
 }
 
-// ═══ SINGLE EPISODE ═══
+// ═══ SINGLE EPISODE (SEASON-WISE) ═══
 function addSingleEpisode() {
   if (!currentEditId) { alert("Pehle anime select karein."); return; }
+  if (!currentSeason) { alert("Pehle season select karo."); return; }
 
   const num = document.getElementById("slNumber").value;
   const title = document.getElementById("slTitle").value.trim();
@@ -448,17 +421,15 @@ function addSingleEpisode() {
   const isDownload = link.includes("download") || link.includes("drive");
 
   const payload = {
-    number: parseInt(num),
-    title: title,
+    number: parseInt(num), title,
     telegram: isTelegram ? link : "",
     download: isDownload ? link : "",
     streaming: !isTelegram && !isDownload ? link : "",
-    thumb: thumb,
-    createdAt: Date.now()
+    thumb, createdAt: Date.now()
   };
 
-  animeRef.child(currentEditId).child("episodes").push(payload).then(() => {
-    showToast("✅ Episode added!");
+  animeRef.child(currentEditId).child("seasons").child(currentSeason).push(payload).then(() => {
+    showToast("✅ Episode added to " + currentSeason.replace(/_/g, " ") + "!");
     ["slNumber","slTitle","slLink","slThumb"].forEach(id => {
       const el = document.getElementById(id);
       if (el) el.value = "";
@@ -466,9 +437,10 @@ function addSingleEpisode() {
   });
 }
 
-// ═══ BATCH EPISODE ═══
+// ═══ BATCH EPISODE (SEASON-WISE) ═══
 function addBatchEpisodes() {
   if (!currentEditId) { alert("Pehle anime select karein."); return; }
+  if (!currentSeason) { alert("Pehle season select karo."); return; }
 
   const input = document.getElementById("batchInput").value.trim();
   if (!input) { alert("Episodes data daalo!"); return; }
@@ -476,8 +448,7 @@ function addBatchEpisodes() {
   const lines = input.split("\n").map(l => l.trim()).filter(Boolean);
   if (!lines.length) { alert("Koi valid line nahi mili!"); return; }
 
-  let added = 0;
-  let errors = 0;
+  let added = 0, errors = 0;
 
   lines.forEach((line, idx) => {
     const parts = line.split("|").map(p => p.trim());
@@ -485,35 +456,43 @@ function addBatchEpisodes() {
     if (!num) { errors++; return; }
 
     const payload = {
-      number: parseInt(num),
-      title: parts[5] || "",
-      q480: parts[1] || "",
-      q720: parts[2] || "",
-      q1080: parts[3] || "",
-      telegram: parts[4] || "",
-      streaming: parts[1] || "",
-      streaming2: parts[2] || "",
-      streaming3: parts[3] || "",
+      number: parseInt(num), title: parts[5] || "",
+      q480: parts[1] || "", q720: parts[2] || "", q1080: parts[3] || "",
+      telegram: parts[4] || "", streaming: parts[1] || "",
+      streaming2: parts[2] || "", streaming3: parts[3] || "",
       createdAt: Date.now() + idx
     };
 
-    animeRef.child(currentEditId).child("episodes").push(payload)
-      .then(() => { added++; })
-      .catch(() => { errors++; });
+    animeRef.child(currentEditId).child("seasons").child(currentSeason).push(payload)
+      .then(() => { added++; }).catch(() => { errors++; });
   });
 
   setTimeout(() => {
-    showToast(`✅ ${added} episodes added! ${errors ? `(${errors} failed)` : ""}`);
+    showToast(`✅ ${added} episodes added to ${currentSeason.replace(/_/g, " ")}! ${errors ? `(${errors} failed)` : ""}`);
     document.getElementById("batchInput").value = "";
   }, 1500);
 }
 
-function deleteEpisode(eid) {
+window.deleteSeasonEpisode = function(animeId, seasonName, eid) {
   if (!confirm("Episode delete karein?")) return;
-  animeRef.child(currentEditId).child("episodes").child(eid).remove().then(() => {
+  animeRef.child(animeId).child("seasons").child(seasonName).child(eid).remove().then(() => {
     showToast("🗑️ Episode deleted");
   });
-}
+};
+
+// ═══ MIGRATION: Purane episodes → Season_1 ═══
+window.migrateToSeasons = function(animeId) {
+  if (!confirm("Purane episodes ko Season_1 me convert karein?")) return;
+  animeRef.child(animeId).once("value").then(snap => {
+    const anime = snap.val() || {};
+    if (!anime.episodes) { alert("Koi purane episodes nahi mile."); return; }
+    animeRef.child(animeId).child("seasons").child("Season_1").set(anime.episodes).then(() => {
+      animeRef.child(animeId).child("episodes").remove();
+      showToast("✅ Converted to Season_1!");
+      loadSeasons(animeId);
+    });
+  });
+};
 
 // ═══ TOAST ═══
 function showToast(msg) {
@@ -529,4 +508,4 @@ function showToast(msg) {
   setTimeout(() => toast.classList.remove("show"), 2500);
 }
 
-console.log("✅ Anime Hindi Zone admin.js loaded (FIXED)");
+console.log("✅ Admin.js loaded (SEASON SYSTEM)");
