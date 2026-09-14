@@ -30,6 +30,7 @@
 
 <div class="admin-container">
 
+  <!-- SEARCH -->
   <section class="admin-section">
     <h2>🔍 Search Anime (AniList — Auto Fetch)</h2>
     <div class="search-panel-box">
@@ -43,12 +44,13 @@
     <div id="malResults" class="anilist-results"></div>
   </section>
 
+  <!-- MANUAL ADD -->
   <section class="admin-section">
     <h2>✏️ Manual Add / Edit Anime</h2>
     <div class="form-grid">
       <input id="aTitle" placeholder="Anime Title *">
       <input id="aPoster" placeholder="Poster Image URL *">
-      <input id="aBanner" placeholder="Banner Image URL (optional)">
+      <input id="aBanner" placeholder="Banner Image URL">
       <input id="aYear" placeholder="Year">
       <input id="aRating" placeholder="Rating">
       <input id="aGenres" placeholder="Genres (Action,Adventure)">
@@ -59,27 +61,38 @@
     </div>
   </section>
 
+  <!-- SEARCH EXISTING -->
   <section class="admin-section">
     <h2>🔍 Search Existing Anime</h2>
     <input id="adminSearch" placeholder="Type anime name..." style="width:100%;padding:13px 15px;border-radius:12px;border:1px solid rgba(255,255,255,0.08);background:#0f0f1a;color:#fff;font-family:inherit;font-size:0.9rem;outline:none;">
     <div class="cards-grid" id="adminSearchResults" style="margin-top:15px;"></div>
   </section>
 
+  <!-- ALL ANIME -->
   <section class="admin-section">
     <h2>📚 All Anime</h2>
     <div class="admin-list" id="adminList"></div>
   </section>
 
+  <!-- EPISODES -->
   <section class="admin-section" id="episodeSection" style="display:none;">
-    <h2>🎬 Add Episodes to: <span id="currentAnimeName" style="color:#d8b4fe;"></span></h2>
+    <h2>🎬 Add Episodes to: <span id="currentAnimeName" style="color:#c4b5fd;"></span></h2>
+
+    <!-- SEASON SELECTOR -->
+    <div class="admin-season-selector" id="seasonSelector" style="margin-bottom:16px;">
+      <p class="empty-msg">Loading seasons...</p>
+    </div>
+
+    <!-- MODE TABS -->
     <div class="admin-mode-tabs">
       <button class="admin-mode-tab active" data-mode="multiquality" onclick="switchAdminMode('multiquality', this)">🎯 Multi-Quality</button>
       <button class="admin-mode-tab" data-mode="single" onclick="switchAdminMode('single', this)">📺 Single Link</button>
       <button class="admin-mode-tab" data-mode="batch" onclick="switchAdminMode('batch', this)">⚡ Batch Add</button>
     </div>
 
+    <!-- MULTI-QUALITY -->
     <div class="admin-mode-content active" id="mode-multiquality">
-      <div class="mode-hint"><strong>🎯 Smart Mode:</strong> Ek hi baar me saari qualities add karo.</div>
+      <div class="mode-hint"><strong>🎯 Smart Mode:</strong> Ek hi baar me saari qualities add karo — selected season me save hoga.</div>
       <div class="form-grid">
         <input id="mqNumber" placeholder="Episode Number *" type="number">
         <input id="mqTitle" placeholder="Episode Title">
@@ -94,6 +107,7 @@
       </div>
     </div>
 
+    <!-- SINGLE -->
     <div class="admin-mode-content" id="mode-single">
       <div class="mode-hint"><strong>📺 Single Mode:</strong> Sirf ek link ho toh.</div>
       <div class="form-grid">
@@ -105,6 +119,7 @@
       </div>
     </div>
 
+    <!-- BATCH -->
     <div class="admin-mode-content" id="mode-batch">
       <div class="mode-hint"><strong>⚡ Batch Mode:</strong> Format: <code>number|480p|720p|1080p|telegram</code></div>
       <div class="form-grid">
@@ -141,4 +156,4 @@ function switchAdminMode(mode, btn) {
 }
 </script>
 </body>
-  </html>
+</html>
