@@ -1569,3 +1569,91 @@ body.light-theme .video-placeholder { color: #8a8a9e; }
   .filter-panel { max-width: 1000px; margin: 12px auto; }
   .filter-panel-btn { display: block; margin: 0 auto 12px; }
                    }
+
+/* ═══════════════════════════════════════════ */
+/* SEASON TABS (User Side) */
+/* ═══════════════════════════════════════════ */
+.season-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  scrollbar-width: none;
+}
+.season-tabs::-webkit-scrollbar { display: none; }
+
+.season-tab {
+  flex-shrink: 0;
+  padding: 10px 20px;
+  background: rgba(26, 21, 40, 0.7);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: #a1a1b5;
+  border-radius: 25px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: 0.25s;
+  font-family: inherit;
+}
+.season-tab:hover {
+  background: rgba(139, 92, 246, 0.15);
+  color: #c4b5fd;
+  border-color: rgba(139, 92, 246, 0.3);
+}
+.season-tab.active {
+  background: linear-gradient(135deg, #8b5cf6, #10b981);
+  color: #fff;
+  border-color: transparent;
+  box-shadow: 0 6px 20px rgba(139, 92, 246, 0.4);
+}
+
+/* ═══════════════════════════════════════════ */
+/* SEASON SELECTOR (Admin Side) */
+/* ═══════════════════════════════════════════ */
+.admin-season-selector {
+  background: rgba(10, 6, 18, 0.6);
+  border: 1px solid rgba(139, 92, 246, 0.25);
+  border-radius: 14px;
+  padding: 14px;
+}
+.season-selector-tabs {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.season-selector-tab {
+  padding: 8px 16px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #a1a1b5;
+  border-radius: 20px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: 0.25s;
+  font-family: inherit;
+}
+.season-selector-tab:hover {
+  background: rgba(139, 92, 246, 0.15);
+  color: #c4b5fd;
+  border-color: rgba(139, 92, 246, 0.4);
+}
+.season-selector-tab.active {
+  background: linear-gradient(135deg, #8b5cf6, #10b981);
+  color: #fff;
+  border-color: transparent;
+  box-shadow: 0 4px 14px rgba(139, 92, 246, 0.4);
+}
+.season-selector-tab.new-season-btn {
+  background: rgba(16, 185, 129, 0.15);
+  border-color: rgba(16, 185, 129, 0.4);
+  color: #6ee7b7;
+}
+.season-selector-tab.new-season-btn:hover {
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: #fff;
+  border-color: transparent;
+}
