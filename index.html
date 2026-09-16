@@ -51,31 +51,15 @@
 
 <div class="filter-panel" id="filterPanel">
   <div class="filter-row">
-    <div>
-      <label>📅 Year</label>
-      <select id="filterYear"><option value="All">All Years</option></select>
-    </div>
-    <div>
-      <label>⭐ Min Rating</label>
-      <select id="filterRating">
-        <option value="All">Any</option>
-        <option value="6">6+</option>
-        <option value="7">7+</option>
-        <option value="8">8+</option>
-        <option value="9">9+</option>
-      </select>
-    </div>
-    <div>
-      <label>🎬 Format</label>
-      <select id="filterFormat">
-        <option value="All">All</option>
-        <option value="TV">TV Series</option>
-        <option value="MOVIE">Movie</option>
-        <option value="OVA">OVA</option>
-        <option value="ONA">ONA</option>
-        <option value="SPECIAL">Special</option>
-      </select>
-    </div>
+    <div><label>📅 Year</label><select id="filterYear"><option value="All">All Years</option></select></div>
+    <div><label>⭐ Min Rating</label><select id="filterRating">
+      <option value="All">Any</option><option value="6">6+</option><option value="7">7+</option>
+      <option value="8">8+</option><option value="9">9+</option>
+    </select></div>
+    <div><label>🎬 Format</label><select id="filterFormat">
+      <option value="All">All</option><option value="TV">TV Series</option><option value="MOVIE">Movie</option>
+      <option value="OVA">OVA</option><option value="ONA">ONA</option><option value="SPECIAL">Special</option>
+    </select></div>
   </div>
   <div class="filter-actions">
     <button class="apply" onclick="applyAdvancedFilter()">✅ Apply Filter</button>
@@ -218,18 +202,34 @@ document.addEventListener("DOMContentLoaded", function() {
 <!-- ═══════════════════════════════════════════ -->
 <div class="tg-popup-overlay" id="tgPopupOverlay">
   <div class="tg-popup">
-    <button class="tg-popup-close" onclick="closeTgPopup()">✕</button>
-    <div class="tg-popup-icon">📢</div>
-    <h3>Join Anime Hindi Zone Telegram</h3>
-    <p>Latest anime updates, new episodes aur exclusive content ke liye humara Telegram channel join karein!</p>
+    <button class="tg-popup-close" onclick="closeTgPopup()" aria-label="Close">
+      <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+        <line x1="18" y1="6" x2="6" y2="18"/>
+        <line x1="6" y1="6" x2="18" y2="18"/>
+      </svg>
+    </button>
+
+    <div class="tg-popup-header">
+      <div class="tg-popup-icon">
+        <svg viewBox="0 0 24 24" width="32" height="32" fill="#ffffff">
+          <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.26-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/>
+        </svg>
+      </div>
+      <div class="tg-popup-header-text">
+        <h3>Anime Hindi Zone</h3>
+        <p class="tg-popup-subtitle">Official Channel</p>
+      </div>
+    </div>
+
+    <p class="tg-popup-desc">Get fast links &amp; updates instantly.</p>
+
     <a href="https://t.me/Anime_World_official_Hindi_Dubed" 
        target="_blank" 
        rel="noopener" 
        class="tg-popup-btn" 
        onclick="closeTgPopup()">
-      <span>📱</span> Join Telegram Channel
+      Join Channel
     </a>
-    <button class="tg-popup-later" onclick="closeTgPopup()">Maybe Later</button>
   </div>
 </div>
 
@@ -237,9 +237,9 @@ document.addEventListener("DOMContentLoaded", function() {
 .tg-popup-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.85);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
   z-index: 99999;
   display: none;
   align-items: center;
@@ -251,85 +251,131 @@ document.addEventListener("DOMContentLoaded", function() {
 @keyframes tgFadeIn { from { opacity: 0; } to { opacity: 1; } }
 
 .tg-popup {
-  background: linear-gradient(160deg, #0a0e1a, #0f1524);
-  border: 1px solid rgba(6, 182, 212, 0.4);
+  background: #0d1117;
   border-radius: 24px;
-  padding: 40px 28px 28px;
-  max-width: 400px;
+  padding: 24px 22px 22px;
+  max-width: 420px;
   width: 100%;
-  text-align: center;
+  text-align: left;
   position: relative;
-  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.8), 0 0 60px rgba(6, 182, 212, 0.3);
-  animation: tgPopIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 
+    0 25px 60px rgba(0, 0, 0, 0.8),
+    0 0 0 2px rgba(255, 107, 157, 0.5),
+    0 0 40px rgba(255, 107, 157, 0.4),
+    0 0 0 3px rgba(255, 179, 198, 0.2);
+  animation: tgPopIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  overflow: hidden;
+}
+.tg-popup::before {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  border-radius: 26px;
+  padding: 2px;
+  background: linear-gradient(135deg, #ff6b9d, #c084fc, #f97316, #ff6b9d);
+  background-size: 300% 300%;
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  z-index: -1;
+  animation: gradientShift 4s ease infinite;
+  opacity: 0.7;
+}
+@keyframes gradientShift {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
 }
 @keyframes tgPopIn {
-  from { transform: scale(0.8) translateY(20px); opacity: 0; }
+  from { transform: scale(0.85) translateY(20px); opacity: 0; }
   to { transform: scale(1) translateY(0); opacity: 1; }
 }
 
 .tg-popup-close {
   position: absolute;
-  top: 12px;
-  right: 12px;
-  width: 32px;
-  height: 32px;
+  top: 16px;
+  right: 16px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  color: #fff;
-  font-size: 0.9rem;
+  background: #2a2f3a;
+  border: none;
+  color: #9ca3af;
   cursor: pointer;
-  font-family: inherit;
-  transition: all 0.3s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.25s;
+  z-index: 5;
 }
 .tg-popup-close:hover {
-  background: linear-gradient(135deg, #ef4444, #dc2626);
-  transform: rotate(90deg) scale(1.1);
-}
-
-.tg-popup-icon {
-  font-size: 3.5rem;
-  margin-bottom: 12px;
-  animation: tgIconBounce 2s infinite;
-  filter: drop-shadow(0 0 20px rgba(6, 182, 212, 0.6));
-}
-@keyframes tgIconBounce {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-8px); }
-}
-
-.tg-popup h3 {
-  font-size: 1.4rem;
-  font-weight: 800;
+  background: #3a3f4a;
   color: #fff;
-  margin-bottom: 12px;
-  background: linear-gradient(135deg, #fff, #67e8f9);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  transform: rotate(90deg);
 }
-.tg-popup p {
-  color: #94a3b8;
-  font-size: 0.9rem;
-  line-height: 1.6;
-  margin-bottom: 24px;
+
+.tg-popup-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 18px;
+  padding-right: 40px;
+}
+.tg-popup-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: #2AABEE;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 6px 20px rgba(42, 171, 238, 0.4);
+}
+.tg-popup-icon svg {
+  margin-left: -2px;
+  margin-top: 2px;
+}
+.tg-popup-header-text {
+  flex: 1;
+  min-width: 0;
+}
+.tg-popup-header-text h3 {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin-bottom: 2px;
+  letter-spacing: -0.3px;
+  line-height: 1.2;
+}
+.tg-popup-subtitle {
+  font-size: 0.95rem;
+  color: #2AABEE;
+  font-weight: 500;
+  margin: 0;
+}
+
+.tg-popup-desc {
+  font-size: 1rem;
+  color: #9ca3af;
+  line-height: 1.5;
+  margin-bottom: 22px;
+  padding-right: 10px;
 }
 
 .tg-popup-btn {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 10px;
-  background: linear-gradient(135deg, #0088cc, #00a8e8);
-  color: #fff;
-  padding: 15px 24px;
-  border-radius: 14px;
-  font-size: 1rem;
-  font-weight: 800;
+  width: 100%;
+  background: #2AABEE;
+  color: #ffffff;
+  padding: 17px 24px;
+  border-radius: 50px;
+  font-size: 1.05rem;
+  font-weight: 700;
   text-decoration: none;
-  box-shadow: 0 10px 30px rgba(0, 136, 204, 0.5);
-  transition: all 0.3s;
-  margin-bottom: 12px;
+  transition: all 0.25s;
+  letter-spacing: 0.2px;
   position: relative;
   overflow: hidden;
 }
@@ -340,27 +386,27 @@ document.addEventListener("DOMContentLoaded", function() {
   left: -100%;
   width: 100%;
   height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
-  transition: left 0.5s;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.25), transparent);
+  transition: left 0.6s;
 }
 .tg-popup-btn:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 15px 40px rgba(0, 136, 204, 0.7);
+  background: #1E96D4;
+  transform: translateY(-2px);
+  box-shadow: 0 10px 30px rgba(42, 171, 238, 0.5);
 }
 .tg-popup-btn:hover::before { left: 100%; }
+.tg-popup-btn:active { transform: translateY(0); }
 
-.tg-popup-later {
-  background: transparent;
-  border: none;
-  color: #64748b;
-  font-size: 0.85rem;
-  cursor: pointer;
-  padding: 8px 16px;
-  font-family: inherit;
-  font-weight: 600;
-  transition: all 0.3s;
+@media (max-width: 480px) {
+  .tg-popup { padding: 22px 18px 18px; border-radius: 22px; }
+  .tg-popup-icon { width: 50px; height: 50px; }
+  .tg-popup-icon svg { width: 28px; height: 28px; }
+  .tg-popup-header-text h3 { font-size: 1.2rem; }
+  .tg-popup-subtitle { font-size: 0.88rem; }
+  .tg-popup-desc { font-size: 0.92rem; }
+  .tg-popup-btn { padding: 15px 20px; font-size: 1rem; }
+  .tg-popup-close { width: 32px; height: 32px; top: 12px; right: 12px; }
 }
-.tg-popup-later:hover { color: #94a3b8; }
 </style>
 
 <script>
