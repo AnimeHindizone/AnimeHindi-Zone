@@ -29,11 +29,24 @@
 </header>
 
 <div class="analytics-container">
+
   <div class="kpi-grid">
-    <div class="kpi-card pink"><div class="kpi-icon">👥</div><div class="kpi-info"><p>Aaj ke Users</p><h3 id="todayUsers">-</h3></div></div>
-    <div class="kpi-card purple"><div class="kpi-icon">📄</div><div class="kpi-info"><p>Aaj ke Views</p><h3 id="todayViews">-</h3></div></div>
-    <div class="kpi-card cyan"><div class="kpi-icon">🌐</div><div class="kpi-info"><p>Total Views</p><h3 id="totalViews">-</h3></div></div>
-    <div class="kpi-card gold"><div class="kpi-icon">⭐</div><div class="kpi-info"><p>Total Users</p><h3 id="totalUsers">-</h3></div></div>
+    <div class="kpi-card pink">
+      <div class="kpi-icon">👥</div>
+      <div class="kpi-info"><p>Aaj ke Users</p><h3 id="todayUsers">-</h3></div>
+    </div>
+    <div class="kpi-card purple">
+      <div class="kpi-icon">📄</div>
+      <div class="kpi-info"><p>Aaj ke Views</p><h3 id="todayViews">-</h3></div>
+    </div>
+    <div class="kpi-card cyan">
+      <div class="kpi-icon">🌐</div>
+      <div class="kpi-info"><p>Total Views</p><h3 id="totalViews">-</h3></div>
+    </div>
+    <div class="kpi-card gold">
+      <div class="kpi-icon">⭐</div>
+      <div class="kpi-info"><p>Total Users</p><h3 id="totalUsers">-</h3></div>
+    </div>
   </div>
 
   <section class="analytics-section">
@@ -42,13 +55,38 @@
   </section>
 
   <section class="analytics-section">
+    <h2>⏰ Peak Hours (24 Hours)</h2>
+    <div class="hours-chart" id="peakHoursChart"></div>
+  </section>
+
+  <section class="analytics-section">
     <h2>🏆 Top 10 Watched Anime</h2>
     <div class="top-list" id="topAnimeList"></div>
   </section>
 
   <section class="analytics-section">
+    <h2>📺 Top 10 Episodes</h2>
+    <div class="top-list" id="topEpisodesList"></div>
+  </section>
+
+  <section class="analytics-section">
+    <h2>🔗 Traffic Sources</h2>
+    <div class="page-list" id="referrerList"></div>
+  </section>
+
+  <section class="analytics-section">
     <h2>📱 Devices</h2>
     <div class="device-grid" id="deviceGrid"></div>
+  </section>
+
+  <section class="analytics-section">
+    <h2>🌐 Browsers</h2>
+    <div class="device-grid" id="browserGrid"></div>
+  </section>
+
+  <section class="analytics-section">
+    <h2>⏱️ Session Statistics</h2>
+    <div class="device-grid" id="sessionStats"></div>
   </section>
 
   <section class="analytics-section">
@@ -65,6 +103,7 @@
     <h2>📋 All Days History</h2>
     <div class="all-days-list" id="allDaysList"></div>
   </section>
+
 </div>
 
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
@@ -79,4 +118,4 @@ function logoutAnalytics() {
 }
 </script>
 </body>
-                                                                                 </html>
+</html>
