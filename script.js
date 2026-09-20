@@ -1,10 +1,11 @@
 // ═══════════════════════════════════════════
-// TOONFLIX - SCRIPT.JS (SEASON SYSTEM)
+// ANIME HINDI ZONE - SCRIPT.JS
+// Language Badge Only On Detail Page
 // ═══════════════════════════════════════════
 
 (function() {
   try {
-    console.log("🔥 script.js started");
+    console.log("🔥 Anime Hindi Zone script.js started");
 
     const firebaseConfig = {
       databaseURL: "https://animehindi-zone-default-rtdb.firebaseio.com/"
@@ -33,7 +34,7 @@
       window.location.href = "anime.html?id=" + encodeURIComponent(id);
     };
 
-    // ═══ CARD HTML ═══
+    // ═══ CARD HTML — NO LANGUAGE (Only Detail Page) ═══
     function cardHTML(anime, showNew, rank) {
       const poster = anime.poster || "https://via.placeholder.com/300x400?text=No+Image";
       const isNew = showNew && (Date.now() - (anime.createdAt||0) < 7*24*60*60*1000);
@@ -75,7 +76,7 @@
       const added = ToonFav.toggle(anime);
       btn.classList.toggle("active", added);
       btn.textContent = added ? "❤️" : "🤍";
-      showToast(added ? "❤️ Favorites me add kiya!" : "Removed");
+      showToast(added ? "❤️ Added!" : "Removed");
     };
 
     function showToast(msg) {
@@ -107,6 +108,7 @@
             <p>
               ${getYear(a) ? `<span>📅 ${getYear(a)}</span>` : ''}
               ${a.rating ? `<span>⭐ ${a.rating}</span>` : ''}
+              ${a.language ? `<span>📢 ${a.language}</span>` : ''}
             </p>
             <span class="hero-play">▶ Watch Now</span>
           </div>
@@ -190,7 +192,6 @@
       if (p) p.classList.toggle("open");
     };
 
-    // ═══ SEARCH BOX ═══
     let searchTimeout = null;
 
     window.doSearch = function() {
@@ -273,7 +274,6 @@
       attachCardClickHandlers();
     }
 
-    // ═══ HOME PAGE ═══
     if (document.getElementById("allAnime")) {
       animeRef.on("value", (snapshot) => {
         const data = snapshot.val() || {};
@@ -292,7 +292,6 @@
       });
     }
 
-    // ═══ CONTINUE WATCHING ═══
     window.renderContinueWatching = function() {
       const section = document.getElementById("continueWatchingSection");
       const el = document.getElementById("continueWatching");
@@ -317,7 +316,7 @@
       setInterval(window.renderContinueWatching, 3000);
     }
 
-    // ═══ DETAIL PAGE (SEASON SYSTEM) ═══
+    // ═══ DETAIL PAGE — LANGUAGE TAG YAHAN DIKHEGA ═══
     window.loadAnimeDetail = function() {
       const params = new URLSearchParams(window.location.search);
       const id = params.get("id");
@@ -336,54 +335,7 @@
         const userRating = ToonRating.get(id);
 
         let episodesHTML = "";
-        let seasonsHTML = "";
-
-        // ═══ SEASON-WISE STRUCTURE ═══
-        if (a.seasons && Object.keys(a.seasons).length > 0) {
-          const seasonKeys = Object.keys(a.seasons).sort((x, y) => {
-            const nx = parseInt(x.replace(/\D/g, "")) || 0;
-            const ny = parseInt(y.replace(/\D/g, "")) || 0;
-            return nx - ny;
-          });
-
-          const selectedSeason = window._selectedSeason || seasonKeys[0];
-          window._selectedSeason = selectedSeason;
-
-          seasonsHTML = `
-            <div class="season-tabs">
-              ${seasonKeys.map(sk => `
-                <button class="season-tab ${sk === selectedSeason ? 'active' : ''}" 
-                        onclick="switchSeason('${esc(sk)}')">
-                  📺 ${sk.replace(/_/g, " ")}
-                </button>
-              `).join("")}
-            </div>
-          `;
-
-          const seasonEpisodes = a.seasons[selectedSeason] || {};
-          const eps = Object.entries(seasonEpisodes).sort((x,y) => x[1].number - y[1].number);
-
-          if (eps.length === 0) {
-            episodesHTML = '<p class="empty-msg">Is season me abhi koi episode nahi hai.</p>';
-          } else {
-            episodesHTML = eps.map(([eid, ep]) => {
-              const buttons = [];
-              if (ep.telegram) buttons.push(`<a href="${ep.telegram}" target="_blank" rel="noopener" class="ep-action-btn tg">📱 Telegram</a>`);
-              if (ep.streaming || ep.streaming2 || ep.streaming3 || ep.link || ep.q480 || ep.q720 || ep.q1080) {
-                buttons.push(`<a href="watch.html?anime=${encodeURIComponent(id)}&season=${encodeURIComponent(selectedSeason)}&ep=${ep.number}" class="ep-action-btn stream">🎬 Watch Online</a>`);
-              }
-              if (ep.download) buttons.push(`<a href="${ep.download}" target="_blank" rel="noopener" class="ep-action-btn dl">⬇️ Download</a>`);
-              const btnHTML = buttons.length ? `<div class="ep-actions">${buttons.join("")}</div>` : '<p class="ep-no-link">⚠️ Koi link nahi</p>';
-              return `
-                <div class="episode-card">
-                  <div class="ep-header"><strong>EP ${ep.number}</strong>${ep.title ? `<span>${ep.title}</span>` : ''}</div>
-                  ${btnHTML}
-                </div>`;
-            }).join("");
-          }
-        } 
-        // ═══ PURANA FLAT STRUCTURE ═══
-        else if (a.episodes) {
+        if (a.episodes) {
           const eps = Object.entries(a.episodes).sort((x,y) => x[1].number - y[1].number);
           episodesHTML = eps.map(([eid, ep]) => {
             const buttons = [];
@@ -412,6 +364,8 @@
               <div class="detail-meta">
                 ${year ? `<span class="meta-tag">📅 ${year}</span>` : ""}
                 ${a.rating ? `<span class="meta-tag">⭐ ${a.rating}</span>` : ""}
+                ${a.language ? `<span class="meta-tag language-tag">📢 ${a.language}</span>` : ""}
+                ${a.episodes ? `<span class="meta-tag">🎬 ${Object.keys(a.episodes).length} Episodes</span>` : ""}
                 ${genreList.map(g => `<span class="meta-tag">${g}</span>`).join("")}
               </div>
               <div class="detail-actions">
@@ -428,7 +382,6 @@
           </div>
           <div class="episodes-section">
             <h2>📺 Episodes</h2>
-            ${seasonsHTML}
             <div class="episode-grid-new">${episodesHTML}</div>
           </div>
           <div class="comments-section">
@@ -442,13 +395,6 @@
           </div>`;
         loadComments(id);
       });
-    };
-
-    // ═══ SEASON SWITCH ═══
-    window.switchSeason = function(seasonName) {
-      console.log("🎬 Switching to season:", seasonName);
-      window._selectedSeason = seasonName;
-      loadAnimeDetail();
     };
 
     window.toggleFavDetail = function(id) {
@@ -511,6 +457,6 @@
 
     if (document.getElementById("detailContainer")) window.loadAnimeDetail();
 
-    console.log("✅ script.js loaded (SEASON SYSTEM)");
+    console.log("✅ Anime Hindi Zone script.js loaded");
   } catch (e) { console.error("❌ script.js error:", e); }
 })();
