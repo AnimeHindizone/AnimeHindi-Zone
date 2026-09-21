@@ -1,6 +1,6 @@
 // ═══════════════════════════════════════════
 // ANIME HINDI ZONE - SCRIPT.JS
-// Language Badge Only On Detail Page
+// Season System + Language on Detail Page
 // ═══════════════════════════════════════════
 
 (function() {
@@ -34,7 +34,7 @@
       window.location.href = "anime.html?id=" + encodeURIComponent(id);
     };
 
-    // ═══ CARD HTML — NO LANGUAGE (Only Detail Page) ═══
+    // ═══ CARD HTML ═══
     function cardHTML(anime, showNew, rank) {
       const poster = anime.poster || "https://via.placeholder.com/300x400?text=No+Image";
       const isNew = showNew && (Date.now() - (anime.createdAt||0) < 7*24*60*60*1000);
@@ -316,7 +316,9 @@
       setInterval(window.renderContinueWatching, 3000);
     }
 
-    // ═══ DETAIL PAGE — LANGUAGE TAG YAHAN DIKHEGA ═══
+    // ═══════════════════════════════════════════
+    // DETAIL PAGE — SEASON TABS + LANGUAGE
+    // ═══════════════════════════════════════════
     window.loadAnimeDetail = function() {
       const params = new URLSearchParams(window.location.search);
       const id = params.get("id");
@@ -335,7 +337,54 @@
         const userRating = ToonRating.get(id);
 
         let episodesHTML = "";
-        if (a.episodes) {
+        let seasonsHTML = "";
+
+        // ═══ SEASON-WISE STRUCTURE ═══
+        if (a.seasons && Object.keys(a.seasons).length > 0) {
+          const seasonKeys = Object.keys(a.seasons).sort((x, y) => {
+            const nx = parseInt(x.replace(/\D/g, "")) || 0;
+            const ny = parseInt(y.replace(/\D/g, "")) || 0;
+            return nx - ny;
+          });
+
+          const selectedSeason = window._selectedSeason || seasonKeys[0];
+          window._selectedSeason = selectedSeason;
+
+          seasonsHTML = `
+            <div class="season-tabs">
+              ${seasonKeys.map(sk => `
+                <button class="season-tab ${sk === selectedSeason ? 'active' : ''}" 
+                        onclick="switchSeason('${esc(sk)}')">
+                  📺 ${sk.replace(/_/g, " ")}
+                </button>
+              `).join("")}
+            </div>
+          `;
+
+          const seasonEpisodes = a.seasons[selectedSeason] || {};
+          const eps = Object.entries(seasonEpisodes).sort((x,y) => x[1].number - y[1].number);
+
+          if (eps.length === 0) {
+            episodesHTML = '<p class="empty-msg">Is season me abhi koi episode nahi hai.</p>';
+          } else {
+            episodesHTML = eps.map(([eid, ep]) => {
+              const buttons = [];
+              if (ep.telegram) buttons.push(`<a href="${ep.telegram}" target="_blank" rel="noopener" class="ep-action-btn tg">📱 Telegram</a>`);
+              if (ep.streaming || ep.streaming2 || ep.streaming3 || ep.link || ep.q480 || ep.q720 || ep.q1080) {
+                buttons.push(`<a href="watch.html?anime=${encodeURIComponent(id)}&season=${encodeURIComponent(selectedSeason)}&ep=${ep.number}" class="ep-action-btn stream">🎬 Watch Online</a>`);
+              }
+              if (ep.download) buttons.push(`<a href="${ep.download}" target="_blank" rel="noopener" class="ep-action-btn dl">⬇️ Download</a>`);
+              const btnHTML = buttons.length ? `<div class="ep-actions">${buttons.join("")}</div>` : '<p class="ep-no-link">⚠️ Koi link nahi</p>';
+              return `
+                <div class="episode-card">
+                  <div class="ep-header"><strong>EP ${ep.number}</strong>${ep.title ? `<span>${ep.title}</span>` : ''}</div>
+                  ${btnHTML}
+                </div>`;
+            }).join("");
+          }
+        } 
+        // ═══ LEGACY FLAT EPISODES ═══
+        else if (a.episodes) {
           const eps = Object.entries(a.episodes).sort((x,y) => x[1].number - y[1].number);
           episodesHTML = eps.map(([eid, ep]) => {
             const buttons = [];
@@ -365,7 +414,7 @@
                 ${year ? `<span class="meta-tag">📅 ${year}</span>` : ""}
                 ${a.rating ? `<span class="meta-tag">⭐ ${a.rating}</span>` : ""}
                 ${a.language ? `<span class="meta-tag language-tag">📢 ${a.language}</span>` : ""}
-                ${a.episodes ? `<span class="meta-tag">🎬 ${Object.keys(a.episodes).length} Episodes</span>` : ""}
+                ${a.episodes || a.seasons ? `<span class="meta-tag">🎬 Episodes</span>` : ""}
                 ${genreList.map(g => `<span class="meta-tag">${g}</span>`).join("")}
               </div>
               <div class="detail-actions">
@@ -382,6 +431,7 @@
           </div>
           <div class="episodes-section">
             <h2>📺 Episodes</h2>
+            ${seasonsHTML}
             <div class="episode-grid-new">${episodesHTML}</div>
           </div>
           <div class="comments-section">
@@ -395,6 +445,11 @@
           </div>`;
         loadComments(id);
       });
+    };
+
+    window.switchSeason = function(seasonName) {
+      window._selectedSeason = seasonName;
+      loadAnimeDetail();
     };
 
     window.toggleFavDetail = function(id) {
