@@ -1,6 +1,6 @@
 // ═══════════════════════════════════════════
-// ANIME HINDI ZONE - WATCH PAGE
-// Season System + Legacy Episodes Support
+// ANIME HINDI ZONE - WATCH.JS (FINAL FIXED)
+// Season Auto-Detect + Clean URLs
 // ═══════════════════════════════════════════
 
 const firebaseConfig = {
@@ -16,12 +16,19 @@ let currentSeason = "Season_1";
 let allEpisodes = [];
 let allSeasons = [];
 
-// ═══ BACK BUTTON ═══
+console.log("🔥 Anime Hindi Zone watch.js INIT");
+
 function goBack() {
   const params = new URLSearchParams(window.location.search);
   const animeId = params.get("anime");
   if (animeId) window.location.href = `anime.html?id=${animeId}`;
   else window.location.href = "index.html";
+}
+window.goBack = goBack;
+
+function hasRealEpisodes(seasonObj) {
+  if (!seasonObj || typeof seasonObj !== "object") return false;
+  return Object.keys(seasonObj).filter(k => !k.startsWith("_")).length > 0;
 }
 
 // ═══════════════════════════════════════════
@@ -30,89 +37,45 @@ function goBack() {
 function loadWatchPage() {
   const params = new URLSearchParams(window.location.search);
   const animeId = params.get("anime");
-  const seasonParam = params.get("season") || "Season_1";
+  const seasonParam = params.get("season") || "";  // ✅ Empty default — auto-detect
   const epNum = parseInt(params.get("ep") || "1");
   const el = document.getElementById("watchContainer");
 
+  console.log("🎬 Loading anime:", animeId, "Season:", seasonParam || "auto", "EP:", epNum);
+
   if (!animeId) {
-    el.innerHTML = "<p class='empty-msg'>Anime not found.</p>";
+    el.innerHTML = `
+      <div style="padding:40px 20px;text-align:center;">
+        <p class="empty-msg">❌ URL me anime ID nahi hai</p>
+        <a href="index.html" class="primary-btn" style="display:inline-block;margin-top:20px;padding:12px 24px;text-decoration:none;">← Home</a>
+      </div>
+    `;
     return;
   }
 
-  console.log("🎬 Loading:", animeId, "Season:", seasonParam, "EP:", epNum);
-
   animeRef.child(animeId).on("value", (snap) => {
     const a = snap.val();
+    
     if (!a) {
-      el.innerHTML = "<p class='empty-msg'>Anime not found.</p>";
-      return;
-    }
-
-    currentAnime = { id: animeId, ...a };
-    currentEpNum = epNum;
-    currentSeason = seasonParam;
-
-    // ═══════════════════════════════════════════
-    // SEASON SYSTEM DETECTION
-    // ═══════════════════════════════════════════
-
-    // Priority 1: Naya seasons structure
-    if (a.seasons && Object.keys(a.seasons).length > 0) {
-      allSeasons = Object.keys(a.seasons)
-        .filter(k => !k.startsWith("_"))
-        .sort((x, y) => {
-          const nx = parseInt(x.replace(/\D/g, "")) || 0;
-          const ny = parseInt(y.replace(/\D/g, "")) || 0;
-          return nx - ny;
-        });
-
-      // Agar season valid nahi hai toh first select karo
-      if (!allSeasons.includes(currentSeason)) {
-        currentSeason = allSeasons[0];
-      }
-
-      const seasonData = a.seasons[currentSeason] || {};
-      allEpisodes = Object.entries(seasonData)
-        .filter(([k, v]) => !k.startsWith("_"))
-        .map(([eid, ep]) => ({ eid, ...ep }))
-        .sort((x, y) => x.number - y.number);
-
-      console.log("📺 Season:", currentSeason, "Episodes:", allEpisodes.length);
-    }
-    // Priority 2: Purane episodes structure (legacy)
-    else if (a.episodes && Object.keys(a.episodes).length > 0) {
-      allSeasons = ["Season_1"];
-      currentSeason = "Season_1";
-      allEpisodes = Object.entries(a.episodes)
-        .map(([eid, ep]) => ({ eid, ...ep }))
-        .sort((x, y) => x.number - y.number);
-
-      console.log("📼 Legacy episodes:", allEpisodes.length);
-    }
-    else {
-      allSeasons = [];
-      allEpisodes = [];
-    }
-
-    // ═══ Current Episode dhundho ═══
-    const currentEp = allEpisodes.find(e => e.number === epNum);
-
-    if (!currentEp) {
       el.innerHTML = `
-        <div style="padding:60px 20px;text-align:center;">
-          <h2 style="font-size:1.4rem;font-weight:800;color:#67e8f9;margin-bottom:12px;">
-            ${a.title || "Untitled"}
+        <div style="padding:40px 20px;text-align:center;">
+          <h2 style="font-size:1.2rem;font-weight:800;color:#67e8f9;margin-bottom:20px;">
+            ⚠️ Anime Not Found
           </h2>
-          <p class="empty-msg" style="display:inline-block;padding:20px 30px;margin-bottom:20px;">
-            ⚠️ Episode ${epNum} nahi mila.<br>
-            <small style="font-size:0.75rem;color:#94a3b8;margin-top:8px;display:block;">
-              Season: ${currentSeason.replace(/_/g, " ")} • Total: ${allEpisodes.length} episodes
-            </small>
-          </p>
-          <div>
-            <a href="anime.html?id=${encodeURIComponent(animeId)}" 
-               class="primary-btn" 
-               style="display:inline-block;padding:12px 24px;text-decoration:none;max-width:250px;">
+          <div class="empty-msg" style="display:inline-block;padding:20px 30px;text-align:left;max-width:400px;">
+            <p style="font-size:0.8rem;color:#94a3b8;line-height:1.8;">
+              <b>Debug Info:</b><br>
+              • Looking for ID: <code style="color:#22d3ee;">${animeId}</code><br>
+              • Firebase: animehindi-zone<br>
+              • Result: NULL<br><br>
+              <b>Possible Reasons:</b><br>
+              1. Ye ID Firebase me nahi hai<br>
+              2. Firebase URL galat hai<br>
+              3. Firebase Rules block kar rahe hain
+            </p>
+          </div>
+          <div style="margin-top:24px;">
+            <a href="anime.html?id=${encodeURIComponent(animeId)}" class="primary-btn" style="display:inline-block;padding:12px 24px;text-decoration:none;">
               ← Wapas Anime Page
             </a>
           </div>
@@ -121,15 +84,93 @@ function loadWatchPage() {
       return;
     }
 
-    // ═══ Progress Save ═══
+    console.log("✅ Anime mila:", a.title);
+    currentAnime = { id: animeId, ...a };
+    currentEpNum = epNum;
+
+    // ═══════════════════════════════════════════
+    // BUILD EPISODES LIST
+    // ═══════════════════════════════════════════
+    let workingEpisodes = null;
+    let workingSeason = null;
+
+    if (a.seasons && Object.keys(a.seasons).filter(k => !k.startsWith("_")).length > 0) {
+      allSeasons = Object.keys(a.seasons)
+        .filter(k => !k.startsWith("_"))
+        .sort((x, y) => (parseInt(x.replace(/\D/g, "")) || 0) - (parseInt(y.replace(/\D/g, "")) || 0));
+
+      // Agar URL me season diya tha
+      if (seasonParam && a.seasons[seasonParam] && hasRealEpisodes(a.seasons[seasonParam])) {
+        workingEpisodes = a.seasons[seasonParam];
+        workingSeason = seasonParam;
+      } else {
+        // Auto-detect: pehla season jisme episodes hain
+        for (const sk of allSeasons) {
+          if (hasRealEpisodes(a.seasons[sk])) {
+            workingEpisodes = a.seasons[sk];
+            workingSeason = sk;
+            break;
+          }
+        }
+        // Agar koi season me episodes nahi hain, toh pehla season use karo
+        if (!workingSeason && allSeasons.length > 0) {
+          workingSeason = allSeasons[0];
+          workingEpisodes = a.seasons[workingSeason] || {};
+        }
+      }
+    } else if (a.episodes && Object.keys(a.episodes).length > 0) {
+      workingSeason = "Season_1";
+      workingEpisodes = a.episodes;
+      allSeasons = ["Season_1"];
+    }
+
+    if (workingSeason && workingEpisodes) {
+      currentSeason = workingSeason;
+      allEpisodes = Object.entries(workingEpisodes)
+        .filter(([k, v]) => !k.startsWith("_") && v && typeof v === "object" && v.number !== undefined)
+        .map(([eid, ep]) => ({ eid, ...ep }))
+        .sort((x, y) => (parseInt(x.number) || 0) - (parseInt(y.number) || 0));
+    } else {
+      allEpisodes = [];
+    }
+
+    console.log("📺 Episodes:", allEpisodes.length, "Season:", currentSeason);
+
+    // ═══ Current Episode dhundho ═══
+    const currentEp = allEpisodes.find(e => parseInt(e.number) === epNum);
+
+    if (!currentEp) {
+      el.innerHTML = `
+        <div style="padding:40px 20px;text-align:center;">
+          <h2 style="font-size:1.4rem;font-weight:800;color:#67e8f9;margin-bottom:12px;">
+            ${a.title || "Untitled"}
+          </h2>
+          <div class="empty-msg" style="display:inline-block;padding:20px 30px;margin-bottom:20px;text-align:left;max-width:400px;">
+            <p style="font-weight:700;color:#fbbf24;margin-bottom:10px;">⚠️ Episode ${epNum} nahi mila</p>
+            <p style="font-size:0.75rem;color:#94a3b8;line-height:1.8;">
+              <b>Debug:</b><br>
+              • Total Episodes: ${allEpisodes.length}<br>
+              • Available EP numbers: ${allEpisodes.map(e => e.number).join(", ") || "None"}<br>
+              • Season: ${currentSeason.replace(/_/g, " ")}
+            </p>
+          </div>
+          <div>
+            <a href="anime.html?id=${encodeURIComponent(animeId)}" class="primary-btn" style="display:inline-block;padding:12px 24px;text-decoration:none;max-width:250px;">
+              ← Wapas
+            </a>
+          </div>
+        </div>
+      `;
+      return;
+    }
+
     saveProgress(currentAnime, currentEp, currentSeason);
 
-    // ═══ Next/Prev Episode ═══
-    const idx = allEpisodes.findIndex(e => e.number === epNum);
+    const idx = allEpisodes.findIndex(e => parseInt(e.number) === epNum);
     const prevEp = idx > 0 ? allEpisodes[idx - 1] : null;
     const nextEp = idx < allEpisodes.length - 1 ? allEpisodes[idx + 1] : null;
 
-    // ═══ Servers (multi-quality) ═══
+    // ═══ Servers ═══
     const servers = [];
     if (currentEp.q480) servers.push({ name: "480p", link: currentEp.q480, icon: "📺" });
     if (currentEp.q720) servers.push({ name: "720p", link: currentEp.q720, icon: "🎬" });
@@ -143,6 +184,14 @@ function loadWatchPage() {
     }
 
     renderPlayer(a, currentEp, servers, prevEp, nextEp);
+  }, (error) => {
+    console.error("❌ Firebase error:", error);
+    el.innerHTML = `
+      <div style="padding:40px 20px;text-align:center;">
+        <p class="empty-msg" style="color:#ef4444;">❌ Firebase Error: ${error.message}</p>
+        <a href="index.html" class="primary-btn" style="display:inline-block;margin-top:20px;padding:12px 24px;text-decoration:none;">← Home</a>
+      </div>
+    `;
   });
 }
 
@@ -154,9 +203,8 @@ function renderPlayer(anime, ep, servers, prevEp, nextEp) {
   const embedUrl = servers[0]?.link || "";
   const comments = JSON.parse(localStorage.getItem(`comments_${anime.id}_${ep.number}`) || "[]");
   const safeAnimeId = encodeURIComponent(anime.id);
-  const safeSeason = encodeURIComponent(currentSeason);
 
-  // ═══ Season Tabs (agar 1 se zyada season hai) ═══
+  // ═══ Season Tabs (agar 1 se zyada) ═══
   let seasonTabsHTML = "";
   if (allSeasons.length > 1) {
     seasonTabsHTML = `
@@ -175,8 +223,7 @@ function renderPlayer(anime, ep, servers, prevEp, nextEp) {
     <div class="watch-header">
       <h1>${anime.title || "Untitled"}</h1>
       <p class="watch-ep-title">
-        Episode ${ep.number}${ep.title ? ": " + ep.title : ""} 
-        • ${currentSeason.replace(/_/g, " ")}
+        Episode ${ep.number}${ep.title ? ": " + ep.title : ""} • ${currentSeason.replace(/_/g, " ")}
       </p>
     </div>
 
@@ -185,7 +232,7 @@ function renderPlayer(anime, ep, servers, prevEp, nextEp) {
     <div class="video-wrapper">
       ${embedUrl
         ? `<iframe src="${embedUrl}" allowfullscreen frameborder="0" allow="autoplay; encrypted-media; picture-in-picture"></iframe>`
-        : `<div class="video-placeholder">⚠️ Is episode ka video link nahi hai</div>`
+        : `<div class="video-placeholder">⚠️ Video link nahi hai</div>`
       }
     </div>
 
@@ -230,11 +277,11 @@ function renderPlayer(anime, ep, servers, prevEp, nextEp) {
 
     <div class="ep-nav">
       ${prevEp
-        ? `<a href="watch.html?anime=${safeAnimeId}&season=${safeSeason}&ep=${prevEp.number}" class="ep-nav-btn">⏮️ EP ${prevEp.number}</a>`
+        ? `<a href="watch.html?anime=${safeAnimeId}&ep=${prevEp.number}" class="ep-nav-btn">⏮️ EP ${prevEp.number}</a>`
         : `<button class="ep-nav-btn disabled" disabled>⏮️ No Previous</button>`
       }
       ${nextEp
-        ? `<a href="watch.html?anime=${safeAnimeId}&season=${safeSeason}&ep=${nextEp.number}" class="ep-nav-btn next">EP ${nextEp.number} ⏭️</a>`
+        ? `<a href="watch.html?anime=${safeAnimeId}&ep=${nextEp.number}" class="ep-nav-btn next">EP ${nextEp.number} ⏭️</a>`
         : `<button class="ep-nav-btn disabled" disabled>No Next ⏭️</button>`
       }
     </div>
@@ -243,7 +290,7 @@ function renderPlayer(anime, ep, servers, prevEp, nextEp) {
       <h3>📺 ${currentSeason.replace(/_/g, " ")} — Saare Episodes (${allEpisodes.length})</h3>
       <div class="ep-list-grid">
         ${allEpisodes.map(e => `
-          <a href="watch.html?anime=${safeAnimeId}&season=${safeSeason}&ep=${e.number}"
+          <a href="watch.html?anime=${safeAnimeId}&ep=${e.number}"
              class="ep-list-btn ${e.number === ep.number ? 'active' : ''}">
             <span class="ep-num">${e.number}</span>
             <span class="ep-name">${e.title || "Episode " + e.number}</span>
@@ -262,33 +309,29 @@ function renderPlayer(anime, ep, servers, prevEp, nextEp) {
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
-// ═══════════════════════════════════════════
-// SEASON SWITCH (WATCH PAGE)
-// ═══════════════════════════════════════════
+// ═══ SEASON SWITCH (sirf tab click pe — baaki jagah nahi) ═══
 window.switchSeasonWatch = function(encodedAnimeId, encodedSeason) {
   const animeId = decodeURIComponent(encodedAnimeId);
   const season = decodeURIComponent(encodedSeason);
   window.location.href = `watch.html?anime=${encodeURIComponent(animeId)}&season=${encodeURIComponent(season)}&ep=1`;
 };
 
-// ═══════════════════════════════════════════
-// SWITCH SERVER
-// ═══════════════════════════════════════════
+// ═══ SERVER SWITCH ═══
 function switchServer(link, btn) {
   document.querySelectorAll(".server-btn").forEach(b => b.classList.remove("active"));
   btn.classList.add("active");
   const iframe = document.querySelector(".video-wrapper iframe");
   if (iframe) iframe.src = link;
 }
+window.switchServer = switchServer;
 
-// ═══════════════════════════════════════════
-// COMMENTS
-// ═══════════════════════════════════════════
+// ═══ COMMENTS ═══
 function toggleComments() {
   const s = document.getElementById("commentsSection");
   s.style.display = s.style.display === "none" ? "block" : "none";
   if (s.style.display === "block") s.scrollIntoView({ behavior: "smooth" });
 }
+window.toggleComments = toggleComments;
 
 function addComment() {
   const name = document.getElementById("commentName").value.trim() || "Anonymous";
@@ -301,10 +344,9 @@ function addComment() {
   document.getElementById("commentText").value = "";
   loadWatchPage();
 }
+window.addComment = addComment;
 
-// ═══════════════════════════════════════════
-// PROGRESS SAVE
-// ═══════════════════════════════════════════
+// ═══ PROGRESS SAVE ═══
 function saveProgress(anime, ep, season) {
   try {
     const history = JSON.parse(localStorage.getItem("toonflix_history") || "[]");
@@ -322,9 +364,7 @@ function saveProgress(anime, ep, season) {
   } catch (e) {}
 }
 
-// ═══════════════════════════════════════════
-// TIME AGO
-// ═══════════════════════════════════════════
+// ═══ TIME AGO ═══
 function timeAgo(ts) {
   const diff = Date.now() - ts;
   const min = Math.floor(diff / 60000);
@@ -335,7 +375,6 @@ function timeAgo(ts) {
   return `${Math.floor(hr / 24)}d ago`;
 }
 
-// ═══════════════════════════════════════════
-// INIT
-// ═══════════════════════════════════════════
+// ═══ INIT ═══
 loadWatchPage();
+console.log("✅ Anime Hindi Zone watch.js loaded");
